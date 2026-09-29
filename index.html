@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Srowser - New Tab</title>
+    
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --card-bg: rgba(22, 31, 48, 0.65);
+            --card-border: rgba(255, 255, 255, 0.12);
+            --card-hover: rgba(56, 189, 248, 0.15);
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.35);
+            --danger: #ef4444;
+        }
+
+        /* Basic Reset & Typography */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.12) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 16px;
+            line-height: 1.5;
+        }
+
+        /* Header & Clock */
+        header {
+            width: 100%;
+            max-width: 760px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header-badge {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            letter-spacing: 0.5px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+        }
+
+        /* Main Container */
+        main {
+            width: 100%;
+            max-width: 680px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: auto 0;
+        }
+
+        /* Logo Title */
+        h1.logo-title {
+            font-size: 4rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -1.5px;
+            margin-bottom: 28px;
+            text-shadow: 0 0 35px var(--accent-glow);
+            text-align: center;
+            user-select: none;
+        }
+
+        /* Search Box */
+        .search-container {
+            width: 100%;
+            margin-bottom: 36px;
+        }
+
+        .search-form {
+            display: flex;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 6px 8px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        .search-form:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 25px var(--accent-glow);
+        }
+
+        .engine-select {
+            background: transparent;
+            color: var(--text-main);
+            border: none;
+            padding: 12px 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            border-right: 1px solid var(--card-border);
+            margin-right: 6px;
+        }
+
+        .engine-select option {
+            background-color: #0f172a;
+            color: var(--text-main);
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            padding: 12px;
+            outline: none;
+            width: 100%;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-sub);
+            opacity: 0.7;
+        }
+
+        .search-button {
+            background: var(--accent);
+            color: #040914;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .search-button:hover {
+            background: #7dd3fc;
+        }
+
+        .search-button:active {
+            transform: scale(0.97);
+        }
+
+        /* Favorites Grid */
+        .favorites-section {
+            width: 100%;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 0 4px;
+        }
+
+        .section-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-sub);
+            font-weight: 700;
+        }
+
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+            gap: 16px;
+            list-style: none;
+        }
+
+        .fav-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 16px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.2s ease;
+            position: relative;
+            aspect-ratio: 1 / 1;
+            text-align: center;
+        }
+
+        .fav-card:hover {
+            transform: translateY(-4px);
+            background: var(--card-hover);
+            border-color: var(--accent);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .fav-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            display: block;
+            line-height: 1;
+        }
+
+        .fav-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 1;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        }
+
+        .fav-card:hover .delete-btn {
+            display: flex;
+        }
+
+        .add-btn-card {
+            background: transparent;
+            border: 2px dashed var(--card-border);
+            color: var(--text-sub);
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .add-btn-card:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        /* Modal Dialog */
+        dialog {
+            background: #0f172a;
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 24px;
+            margin: auto;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.8);
+        }
+
+        dialog::backdrop {
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+        }
+
+        .dialog-form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .dialog-form input {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 12px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .dialog-form input:focus {
+            border-color: var(--accent);
+        }
+
+        .dialog-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-sub);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #040914;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 18px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        footer {
+            width: 100%;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-top: 24px;
+            opacity: 0.8;
+        }
+
+        button, select, input, a {
+            touch-action: manipulation;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header display -->
+    <header>
+        <div class="header-badge" id="clockDisplay">00:00</div>
+        <div class="header-badge" id="dateDisplay">Srowser</div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main>
+        <h1 class="logo-title">Srowser</h1>
+
+        <!-- Search Form (Works natively without JS and handles Google search properly) -->
+        <div class="search-container">
+            <form id="searchForm" class="search-form" action="https://www.google.com/search" method="GET" target="_top">
+                <select id="engineSelect" class="engine-select" aria-label="Select Search Engine">
+                    <option value="google">Google</option>
+                    <option value="duckduckgo">DuckDuckGo</option>
+                    <option value="bing">Bing</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="wikipedia">Wikipedia</option>
+                </select>
+
+                <!-- Query Input Field (name="q" for standard Google search) -->
+                <input 
+                    type="text" 
+                    name="q" 
+                    id="searchInput" 
+                    class="search-input" 
+                    placeholder="Search the web or enter an address..." 
+                    required 
+                    autocomplete="off"
+                    autofocus
+                >
+
+                <button type="submit" class="search-button">Search</button>
+            </form>
+        </div>
+
+        <!-- Favorites Grid -->
+        <section class="favorites-section">
+            <div class="section-header">
+                <span class="section-title">Favorites</span>
+                <button type="button" class="btn-secondary" id="openAddDialogBtn" style="font-size: 0.8rem; padding: 4px 12px;">+ Add</button>
+            </div>
+
+            <ul class="favorites-grid" id="favoritesGrid">
+                <!-- Static HTML Fallback Bookmarks -->
+                <li>
+                    <a href="https://www.google.com" class="fav-card" target="_top">
+                        <span class="fav-icon">🔍</span>
+                        <span class="fav-title">Google</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://www.youtube.com" class="fav-card" target="_top">
+                        <span class="fav-icon">▶️</span>
+                        <span class="fav-title">YouTube</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://github.com" class="fav-card" target="_top">
+                        <span class="fav-icon">💻</span>
+                        <span class="fav-title">GitHub</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://en.wikipedia.org" class="fav-card" target="_top">
+                        <span class="fav-icon">📚</span>
+                        <span class="fav-title">Wikipedia</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://www.reddit.com" class="fav-card" target="_top">
+                        <span class="fav-icon">💬</span>
+                        <span class="fav-title">Reddit</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://x.com" class="fav-card" target="_top">
+                        <span class="fav-icon">🌐</span>
+                        <span class="fav-title">X</span>
+                    </a>
+                </li>
+            </ul>
+        </section>
+    </main>
+
+    <!-- Modal for adding custom sites -->
+    <dialog id="addSiteDialog">
+        <form method="dialog" id="addSiteForm" class="dialog-form">
+            <h3 style="margin-bottom: 4px;">Add New Favorite</h3>
+            
+            <label for="siteTitleInput" style="font-size: 0.8rem; color: var(--text-sub);">Site Name</label>
+            <input type="text" id="siteTitleInput" placeholder="e.g., GitHub" required>
+
+            <label for="siteUrlInput" style="font-size: 0.8rem; color: var(--text-sub);">Web Address (URL)</label>
+            <input type="url" id="siteUrlInput" placeholder="https://example.com" required>
+
+            <label for="siteIconInput" style="font-size: 0.8rem; color: var(--text-sub);">Icon / Emoji (Optional)</label>
+            <input type="text" id="siteIconInput" placeholder="🚀">
+
+            <div class="dialog-actions">
+                <button type="button" class="btn-secondary" id="closeDialogBtn">Cancel</button>
+                <button type="submit" class="btn-primary">Save</button>
+            </div>
+        </form>
+    </dialog>
+
+    <footer>
+        Srowser start page &bull; Simple &amp; Fast
+    </footer>
+
+    <script>
+        (function() {
+            // Default site list fallback
+            const DEFAULT_SITES = [
+                { title: "Google", url: "https://www.google.com", icon: "🔍" },
+                { title: "YouTube", url: "https://www.youtube.com", icon: "▶️" },
+                { title: "GitHub", url: "https://github.com", icon: "💻" },
+                { title: "Wikipedia", url: "https://tr.wikipedia.org", icon: "📚" },
+                { title: "Reddit", url: "https://www.reddit.com", icon: "💬" },
+                { title: "X", url: "https://x.com", icon: "🌐" }
+            ];
+
+            // Search engine configurations
+            const ENGINES = {
+                google: { action: "https://www.google.com/search", name: "q" },
+                duckduckgo: { action: "https://duckduckgo.com/", name: "q" },
+                bing: { action: "https://www.bing.com/search", name: "q" },
+                youtube: { action: "https://www.youtube.com/results", name: "search_query" },
+                wikipedia: { action: "https://tr.wikipedia.org/w/index.php", name: "search" }
+            };
+
+            // DOM Elements
+            const clockDisplay = document.getElementById('clockDisplay');
+            const dateDisplay = document.getElementById('dateDisplay');
+            const searchForm = document.getElementById('searchForm');
+            const engineSelect = document.getElementById('engineSelect');
+            const searchInput = document.getElementById('searchInput');
+            const favoritesGrid = document.getElementById('favoritesGrid');
+            const addSiteDialog = document.getElementById('addSiteDialog');
+            const openAddDialogBtn = document.getElementById('openAddDialogBtn');
+            const closeDialogBtn = document.getElementById('closeDialogBtn');
+            const addSiteForm = document.getElementById('addSiteForm');
+
+            // 1. Clock & Date Display
+            function updateClock() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                clockDisplay.textContent = `${hours}:${minutes}`;
+
+                const options = { day: 'numeric', month: 'long', weekday: 'short' };
+                dateDisplay.textContent = now.toLocaleDateString('tr-TR', options);
+            }
+            updateClock();
+            setInterval(updateClock, 10000);
+
+            // 2. Search Engine Switcher & Google Search Handler
+            function updateEngine() {
+                const selected = engineSelect.value;
+                const config = ENGINES[selected] || ENGINES.google;
+                searchForm.action = config.action;
+                searchInput.name = config.name;
+                localStorage.setItem('srowser_preferred_engine', selected);
+            }
+
+            const savedEngine = localStorage.getItem('srowser_preferred_engine');
+            if (savedEngine && ENGINES[savedEngine]) {
+                engineSelect.value = savedEngine;
+            }
+            updateEngine();
+            engineSelect.addEventListener('change', updateEngine);
+
+            // Handle submission: URL vs Direct Engine Redirect
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const query = searchInput.value.trim();
+                if (!query) return;
+
+                // URL pattern check (e.g., github.com or https://google.com)
+                const isUrl = /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/.*)?$/i.test(query) && !query.includes(' ');
+
+                if (isUrl) {
+                    let targetUrl = query;
+                    if (!/^https?:\/\//i.test(query)) {
+                        targetUrl = 'https://' + query;
+                    }
+                    window.top.location.href = targetUrl;
+                    return;
+                }
+
+                // Construct clean search query URL
+                const selectedEngine = engineSelect.value;
+                let destinationUrl = '';
+
+                if (selectedEngine === 'google') {
+                    destinationUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}&source=hp`;
+                } else if (selectedEngine === 'duckduckgo') {
+                    destinationUrl = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
+                } else if (selectedEngine === 'bing') {
+                    destinationUrl = `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
+                } else if (selectedEngine === 'youtube') {
+                    destinationUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+                } else if (selectedEngine === 'wikipedia') {
+                    destinationUrl = `https://tr.wikipedia.org/w/index.php?search=${encodeURIComponent(query)}`;
+                } else {
+                    destinationUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+                }
+
+                window.top.location.href = destinationUrl;
+            });
+
+            // 3. Favorites Management via LocalStorage
+            function loadFavorites() {
+                try {
+                    const saved = localStorage.getItem('srowser_favorites');
+                    return saved ? JSON.parse(saved) : DEFAULT_SITES;
+                } catch(e) {
+                    return DEFAULT_SITES;
+                }
+            }
+
+            function saveFavorites(list) {
+                localStorage.setItem('srowser_favorites', JSON.stringify(list));
+            }
+
+            function renderFavorites() {
+                const sites = loadFavorites();
+                favoritesGrid.innerHTML = '';
+
+                sites.forEach((site, index) => {
+                    const li = document.createElement('li');
+                    
+                    const card = document.createElement('a');
+                    card.href = site.url;
+                    card.className = 'fav-card';
+                    card.target = '_top';
+
+                    const iconSpan = document.createElement('span');
+                    iconSpan.className = 'fav-icon';
+                    iconSpan.textContent = site.icon || site.title.charAt(0).toUpperCase();
+
+                    const titleSpan = document.createElement('span');
+                    titleSpan.className = 'fav-title';
+                    titleSpan.textContent = site.title;
+
+                    // Delete button
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'delete-btn';
+                    delBtn.innerHTML = '&#10005;';
+                    delBtn.title = 'Sil';
+                    delBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        deleteFavorite(index);
+                    });
+
+                    card.appendChild(delBtn);
+                    card.appendChild(iconSpan);
+                    card.appendChild(titleSpan);
+                    li.appendChild(card);
+                    favoritesGrid.appendChild(li);
+                });
+
+                // Inline "Add New" button card
+                const addLi = document.createElement('li');
+                const addBtn = document.createElement('button');
+                addBtn.type = 'button';
+                addBtn.className = 'fav-card add-btn-card';
+                addBtn.innerHTML = '<span class="fav-icon">+</span><span class="fav-title">Add New</span>';
+                addBtn.addEventListener('click', showModal);
+                addLi.appendChild(addBtn);
+                favoritesGrid.appendChild(addLi);
+            }
+
+            function deleteFavorite(index) {
+                const sites = loadFavorites();
+                sites.splice(index, 1);
+                saveFavorites(sites);
+                renderFavorites();
+            }
+
+            // 4. Modal Dialog Logic
+            function showModal() {
+                if (typeof addSiteDialog.showModal === "function") {
+                    addSiteDialog.showModal();
+                } else {
+                    const title = prompt("Site İsmi:");
+                    let url = prompt("Web Adresi (URL):");
+                    if (title && url) {
+                        if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+                        const sites = loadFavorites();
+                        sites.push({ title: title, url: url, icon: "🔗" });
+                        saveFavorites(sites);
+                        renderFavorites();
+                    }
+                }
+            }
+
+            openAddDialogBtn.addEventListener('click', showModal);
+            closeDialogBtn.addEventListener('click', () => addSiteDialog.close());
+
+            addSiteForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const title = document.getElementById('siteTitleInput').value.trim();
+                let url = document.getElementById('siteUrlInput').value.trim();
+                const icon = document.getElementById('siteIconInput').value.trim() || '🔗';
+
+                if (title && url) {
+                    if (!/^https?:\/\//i.test(url)) {
+                        url = 'https://' + url;
+                    }
+                    const sites = loadFavorites();
+                    sites.push({ title, url, icon });
+                    saveFavorites(sites);
+                    renderFavorites();
+                    addSiteForm.reset();
+                    addSiteDialog.close();
+                }
+            });
+
+            // Initial render
+            renderFavorites();
+        })();
+    </script>
+</body>
+</html>
